@@ -5,7 +5,7 @@
 #include <QBoxLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-
+#include <QMessageBox>
 RecognizerUI::RecognizerUI(): QWidget(NULL, Qt::WindowCloseButtonHint)
 {
     //QDesktopWidget *deskdop = QApplication::desktop ();
@@ -67,6 +67,8 @@ bool RecognizerUI::construct()
     m_buttonsClear.setText("Clear");
 
 
+    connect(&m_buttonsLearn, SIGNAL(clicked()), this, SLOT(onButtonLearnClicked()));
+    connect(&m_buttonsRecognize, SIGNAL(clicked()), this, SLOT(onButtonRecognizeClicked()));
     connect(&m_buttonsClear, SIGNAL(clicked()), m_drawingBoard, SLOT(clear()));
     connect(&m_comboBoxChoiceNumber,SIGNAL(currentIndexChanged(int)  ), this ,SLOT( onComboBoxIndexChanged()  ) );
 
@@ -89,7 +91,6 @@ RecognizerUI* RecognizerUI::NewInstance()
 void RecognizerUI::show()
 {
     QWidget::show();
-
     setFixedSize(width(), height());
 }
 
@@ -102,9 +103,32 @@ IRecognizer* RecognizerUI::getRecognizer()
 {
    return m_algorithm;
 }
+
 void RecognizerUI::onComboBoxIndexChanged()
 {
     m_labelResult.setText(QString::number(m_comboBoxChoiceNumber.currentIndex()));
+}
+
+void RecognizerUI::onButtonLearnClicked()
+{
+    QMessageBox:: StandardButton result= QMessageBox::information(this, "提示",
+         "确认学习数字"+ m_labelResult.text()+" ?",QMessageBox::Yes|QMessageBox::No);
+    switch (result)
+    {
+        case QMessageBox::Yes:
+            m_algorithm->set(m_comboBoxChoiceNumber.currentIndex(),m_drawingBoard->getPointsList());
+            break;
+        default:
+            break;
+    }
+}
+
+void RecognizerUI::onButtonRecognizeClicked()
+{
+    int result = 0;
+    m_algorithm->get(result, m_drawingBoard->getPointsList());
+    m_comboBoxChoiceNumber.setCurrentIndex(result);
+    m_labelResult.setText(QString::number(result));
 }
 
 RecognizerUI::~RecognizerUI()

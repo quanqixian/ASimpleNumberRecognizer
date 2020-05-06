@@ -61,3 +61,7 @@ void DrawingBoard::clear()
     m_image.fill(m_backColor);//RGB（255，255，255）为白色，m_image画布被填充为白色
     update();
 }
+ QList<QPoint>& DrawingBoard::getPointsList(void)
+ {
+     return m_list;
+ }

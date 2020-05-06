@@ -23,6 +23,8 @@ private:
     bool construct();
 public slots:
     void onComboBoxIndexChanged();
+    void onButtonLearnClicked();
+    void onButtonRecognizeClicked();
 public:
     static RecognizerUI* NewInstance();
     void show();

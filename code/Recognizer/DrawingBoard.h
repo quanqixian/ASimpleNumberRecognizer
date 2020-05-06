@@ -11,6 +11,7 @@ class DrawingBoard : public QWidget
     Q_OBJECT
 public:
     explicit DrawingBoard(QWidget *parent = 0, int width = 200, int height = 200);
+    QList<QPoint>& getPointsList(void);
 protected:
     void paintEvent(QPaintEvent *);       /* 重绘事件(重点:由update()函数触发) */
     void mousePressEvent(QMouseEvent *);
