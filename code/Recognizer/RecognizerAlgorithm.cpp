@@ -33,9 +33,11 @@ bool RecognizerAlgorithm::set(const int number, const QList<QPoint>& pointsList)
 
 void RecognizerAlgorithm::get(int &number, const QList<QPoint>& pointsList)
 {
-    double d = 0;
+    double distance = 0;
+    double distanceSum = 0;
     Characteristic chara;
-    double   temp    = 5000;
+    double temp = 100000;
+
     /* 参数检查，如果没有画，直接返回0 */
     if(pointsList.size()==0)
     {
@@ -46,19 +48,23 @@ void RecognizerAlgorithm::get(int &number, const QList<QPoint>& pointsList)
 
     for(int i=0; i<10; i++)
     {
+        distanceSum = 0;
         for(int j = 0; j<m_dataDase[i].size(); j++)
         {
-            d = 0;
+            distance = 0;
             for(int index=0;index<9;index++)
             {
-                d+=(m_dataDase[i][j].array[index] - chara.array[index]) *(m_dataDase[i][j].array[index] - chara.array[index]);
+                distance+=(m_dataDase[i][j].array[index] - chara.array[index]) *(m_dataDase[i][j].array[index] - chara.array[index]);
             }
-            d = qSqrt(d);
-            if(d<temp)
-            {
-                temp =d;
-                number = i;
-            }
+            distance = qSqrt(distance);
+
+            distanceSum += distance;
+        }
+        distance = distanceSum/m_dataDase[i].size();
+        if(distance<temp)
+        {
+            temp = distance;
+            number = i;
         }
     }
 }

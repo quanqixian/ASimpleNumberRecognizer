@@ -71,7 +71,7 @@ bool RecognizerUI::construct()
     connect(&m_buttonsRecognize, SIGNAL(clicked()), this, SLOT(onButtonRecognizeClicked()));
     connect(&m_buttonsClear, SIGNAL(clicked()), m_drawingBoard, SLOT(clear()));
     connect(&m_comboBoxChoiceNumber, SIGNAL(currentIndexChanged(int)), this, SLOT( onComboBoxIndexChanged()));
-    connect(&m_comboBoxChoiceNumber, SIGNAL(currentIndexChanged(int)), m_drawingBoard, SLOT( clear()) );
+    //connect(&m_comboBoxChoiceNumber, SIGNAL(currentIndexChanged(int)), m_drawingBoard, SLOT( clear()) );
     return ret;
 }
 
