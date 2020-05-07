@@ -15,6 +15,13 @@ bool RecognizerAlgorithm::set(const int number, const QList<QPoint>& pointsList)
 {
     bool ret = true;
     Characteristic chara;
+
+    /* 参数检查，如果没有画，直接返回0 */
+    if(pointsList.size()==0)
+    {
+        return false;
+    }
+
     featureExtraction(chara.array, const_cast<QList<QPoint>& >(pointsList));
     for(int i=0;i<9;i++)
     {
@@ -29,6 +36,12 @@ void RecognizerAlgorithm::get(int &number, const QList<QPoint>& pointsList)
     double d = 0;
     Characteristic chara;
     double   temp    = 5000;
+    /* 参数检查，如果没有画，直接返回0 */
+    if(pointsList.size()==0)
+    {
+        number = 0;
+        return ;
+    }
     featureExtraction(chara.array, const_cast<QList<QPoint>& >(pointsList));
 
     for(int i=0; i<10; i++)

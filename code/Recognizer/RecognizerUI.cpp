@@ -70,8 +70,8 @@ bool RecognizerUI::construct()
     connect(&m_buttonsLearn, SIGNAL(clicked()), this, SLOT(onButtonLearnClicked()));
     connect(&m_buttonsRecognize, SIGNAL(clicked()), this, SLOT(onButtonRecognizeClicked()));
     connect(&m_buttonsClear, SIGNAL(clicked()), m_drawingBoard, SLOT(clear()));
-    connect(&m_comboBoxChoiceNumber,SIGNAL(currentIndexChanged(int)  ), this ,SLOT( onComboBoxIndexChanged()  ) );
-
+    connect(&m_comboBoxChoiceNumber, SIGNAL(currentIndexChanged(int)), this, SLOT( onComboBoxIndexChanged()));
+    connect(&m_comboBoxChoiceNumber, SIGNAL(currentIndexChanged(int)), m_drawingBoard, SLOT( clear()) );
     return ret;
 }
 
@@ -111,15 +111,17 @@ void RecognizerUI::onComboBoxIndexChanged()
 
 void RecognizerUI::onButtonLearnClicked()
 {
+    int ret = false;
     QMessageBox:: StandardButton result= QMessageBox::information(this, "提示",
          "确认学习数字"+ m_labelResult.text()+" ?",QMessageBox::Yes|QMessageBox::No);
-    switch (result)
+
+    if(result == QMessageBox::Yes)
     {
-        case QMessageBox::Yes:
-            m_algorithm->set(m_comboBoxChoiceNumber.currentIndex(),m_drawingBoard->getPointsList());
-            break;
-        default:
-            break;
+        ret = m_algorithm->set(m_comboBoxChoiceNumber.currentIndex(),m_drawingBoard->getPointsList());
+        if(ret == false)
+        {
+            QMessageBox::information(this, "提示","学习失败",QMessageBox::Yes);
+        }
     }
 }
 
