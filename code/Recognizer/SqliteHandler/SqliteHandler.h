@@ -4,13 +4,18 @@
 #include <QObject>
 #include <QtSql/QSqlDatabase>
 
+struct Characteristic
+{
+    int array[9];
+};
+
 class SqliteHandler : public QObject
 {
     Q_OBJECT
 public:
     static SqliteHandler* getInstance(void);
     bool additem(int tableIndex, int (&array)[9]);
-    bool getitems(int tableIndex, int startIndex, int number);
+    bool getitems(int tableIndex, int startIndex, int number, QList<Characteristic > &retList);
     bool clearTable(int tableIndex);
     ~SqliteHandler();
 private:

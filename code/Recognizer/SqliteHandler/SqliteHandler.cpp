@@ -15,6 +15,7 @@ SqliteHandler::SqliteHandler()
 SqliteHandler::~SqliteHandler()
 {
     m_db.close();
+    qDebug()<<"m_db.close()";
 }
 
 SqliteHandler* SqliteHandler::getInstance(void)
@@ -128,7 +129,7 @@ bool SqliteHandler::clearTable(int tableIndex)
     }
     return ret;
 }
-bool SqliteHandler::getitems(int tableIndex, int startIndex, int number)
+bool SqliteHandler::getitems(int tableIndex, int startIndex, int number, QList<Characteristic > &retList)
 {
     bool ret = false;
     if((tableIndex>9)||(tableIndex<0))
@@ -149,5 +150,16 @@ bool SqliteHandler::getitems(int tableIndex, int startIndex, int number)
     {
         qDebug() << __func__<<":"<<__LINE__<< sqlQuery.lastError().text();
     }
+	retList.clear();
+	Characteristic chara = {};
+	while(sqlQuery.next())
+	{
+		for(int i=0; i<9; i++)
+		{
+            chara.array[i] = sqlQuery.value(i).toInt();
+		}
+        retList.push_back(chara);
+	}
+
     return ret;
 }
