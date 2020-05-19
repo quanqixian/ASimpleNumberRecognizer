@@ -1,4 +1,4 @@
-﻿#include "SqliteHandler.h"
+#include "SqliteHandler.h"
 #include <QSqlQuery>
 #include <QDebug>
 #include <QSqlError>
@@ -149,17 +149,18 @@ bool SqliteHandler::getitems(int tableIndex, int startIndex, int number, QList<C
     if(false == ret)
     {
         qDebug() << __func__<<":"<<__LINE__<< sqlQuery.lastError().text();
+	return ret;
     }
-	retList.clear();
-	Characteristic chara = {};
-	while(sqlQuery.next())
-	{
-		for(int i=0; i<9; i++)
-		{
+    retList.clear();
+    Characteristic chara = {};
+    while(sqlQuery.next())
+    {
+        for(int i=0; i<9; i++)
+        {
             chara.array[i] = sqlQuery.value(i).toInt();
-		}
-        retList.push_back(chara);
 	}
+        retList.push_back(chara);
+    }
 
     return ret;
 }

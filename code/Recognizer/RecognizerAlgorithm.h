@@ -2,11 +2,7 @@
 #define RECOGNIZERALGORITHM_H
 
 #include "IRecognizer.h"
-
-struct Characteristic
-{
-    int array[9];
-};
+#include "SqliteHandler/SqliteHandler.h"
 
 class RecognizerAlgorithm :public IRecognizer
 {
