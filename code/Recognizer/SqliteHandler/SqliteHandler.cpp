@@ -79,7 +79,7 @@ bool SqliteHandler::init(void)
 /**
  * 向指定的表中添加一个九维特征值
  */
-bool SqliteHandler::additem(int tableIndex, int (&array)[9])
+bool SqliteHandler::addItem(int tableIndex, int (&array)[9])
 {
     bool ret = false;
     if((tableIndex>9)||(tableIndex<0))
@@ -129,7 +129,7 @@ bool SqliteHandler::clearTable(int tableIndex)
     }
     return ret;
 }
-bool SqliteHandler::getitems(int tableIndex, int startIndex, int number, QList<Characteristic > &retList)
+bool SqliteHandler::getItems(int tableIndex, int startIndex, int number, QList<Characteristic > &retList)
 {
     bool ret = false;
     if((tableIndex>9)||(tableIndex<0))
@@ -162,5 +162,24 @@ bool SqliteHandler::getitems(int tableIndex, int startIndex, int number, QList<C
         retList.push_back(chara);
     }
 
+    return ret;
+}
+
+bool SqliteHandler::getItemsCount(int tableIndex, int& retCount)
+{
+    bool ret = false;
+
+    QSqlQuery sqlQuery(m_db);
+
+    QString sqlStr = QString("select count(*) from table%1").arg(QString::number(tableIndex));
+    qDebug()<<sqlStr<<endl;
+    ret = sqlQuery.exec(sqlStr);
+    if(false == ret)
+    {
+        qDebug() << __func__<<":"<<__LINE__<< sqlQuery.lastError().text();
+        return ret;
+    }
+    sqlQuery.next();
+    retCount = sqlQuery.value(0).toInt();
     return ret;
 }

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,10 +16,12 @@ SOURCES += main.cpp\
         Recognizer.cpp \
     RecognizerUI.cpp \
     RecognizerAlgorithm.cpp \
-    DrawingBoard.cpp
+    DrawingBoard.cpp \
+    SqliteHandler/SqliteHandler.cpp
 
 HEADERS  += Recognizer.h \
     RecognizerUI.h \
     RecognizerAlgorithm.h \
     IRecognizer.h \
-    DrawingBoard.h
+    DrawingBoard.h \
+    SqliteHandler/SqliteHandler.h

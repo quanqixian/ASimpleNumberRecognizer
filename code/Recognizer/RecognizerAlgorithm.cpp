@@ -1,9 +1,17 @@
 #include "RecognizerAlgorithm.h"
 #include <QtMath>
 #include <QDebug>
+#define ROW_NUMBER 100
+#include <iostream>
+using namespace  std;
+
 RecognizerAlgorithm::RecognizerAlgorithm()
 {
-
+    /* 从数据库中初始化平均特征值 */
+    for(int i=0;i<10;i++)
+    {
+        getAverageChara(i, m_averageChara[i]);
+    }
 }
 
 RecognizerAlgorithm::~RecognizerAlgorithm()
@@ -11,10 +19,53 @@ RecognizerAlgorithm::~RecognizerAlgorithm()
 
 }
 
+/**
+ * @brief
+ * @param number
+ * @param x
+ * @return
+ */
+bool RecognizerAlgorithm::getAverageChara(int number, Characteristic &averageChara)
+{
+    QList<Characteristic > list;
+    int startRow = 0;
+    int countSum = 0;
+    long long characterSumBuf[9] = {0};
+    while(true)
+    {
+        list.clear();
+        SqliteHandler::getInstance()->getItems(number, startRow, ROW_NUMBER, list);
+        for(int j = 0; j<list.size(); j++)
+        {
+            for(int i=0;i<9;i++)
+            {
+                characterSumBuf[i] += list[j].array[i];
+            }
+        }
+        countSum += list.size();
+
+        /* 读到最后一页，不足ROW_NUMBER个，读完退出 */
+        if(ROW_NUMBER != list.size())
+        {
+            break;
+        }
+    }
+    if(0 != countSum)
+    {
+        for(int i=0;i<9;i++)
+        {
+            averageChara.array[i] = characterSumBuf[i]/countSum;
+        }
+    }
+    return true;
+}
+
+
 bool RecognizerAlgorithm::set(const int number, const QList<QPoint>& pointsList)
 {
     bool ret = true;
     Characteristic chara;
+    int lastCount = 0;
 
     /* 参数检查，如果没有画，直接返回0 */
     if(pointsList.size()==0)
@@ -23,20 +74,33 @@ bool RecognizerAlgorithm::set(const int number, const QList<QPoint>& pointsList)
     }
 
     featureExtraction(chara.array, const_cast<QList<QPoint>& >(pointsList));
-    for(int i=0;i<9;i++)
+
+    SqliteHandler::getInstance()->getItemsCount(number, lastCount);
+    SqliteHandler::getInstance()->addItem(number, chara.array);
+
+    for(int j=0; j<9; j++)
     {
-         qDebug()<<chara.array[i];
+        m_averageChara[number].array[j] =  (m_averageChara[number].array[j] * lastCount + chara.array[j])/(lastCount+1);
     }
-    m_dataDase[number].append(chara);
+#if 0
+    /* 打印每个数字的平均特征值的变化 */
+    for(int x= 0;x<10;x++)
+    {
+        for(int y=0;y<9;y++)
+        {
+            cout<<m_averageChara[x].array[y]<<"  ";
+        }
+        cout<<endl;
+    }
+#endif
     return ret;
 }
 
 void RecognizerAlgorithm::get(int &number, const QList<QPoint>& pointsList)
 {
     double distance = 0;
-    double distanceSum = 0;
     Characteristic chara;
-    double temp = 100000;
+    double temp = INT_MAX;
 
     /* 参数检查，如果没有画，直接返回0 */
     if(pointsList.size()==0)
@@ -48,19 +112,7 @@ void RecognizerAlgorithm::get(int &number, const QList<QPoint>& pointsList)
 
     for(int i=0; i<10; i++)
     {
-        distanceSum = 0;
-        for(int j = 0; j<m_dataDase[i].size(); j++)
-        {
-            distance = 0;
-            for(int index=0;index<9;index++)
-            {
-                distance+=(m_dataDase[i][j].array[index] - chara.array[index]) *(m_dataDase[i][j].array[index] - chara.array[index]);
-            }
-            distance = qSqrt(distance);
-
-            distanceSum += distance;
-        }
-        distance = distanceSum/m_dataDase[i].size();
+        distance = getDistance(chara, m_averageChara[i]);
         if(distance<temp)
         {
             temp = distance;
@@ -69,17 +121,28 @@ void RecognizerAlgorithm::get(int &number, const QList<QPoint>& pointsList)
     }
 }
 
+double RecognizerAlgorithm::getDistance(Characteristic x, Characteristic y)
+{
+    double distance = 0;
+    for(int index=0;index<9;index++)
+    {
+        distance+=(x.array[index] - y.array[index]) *(x.array[index] - y.array[index]);
+    }
+    distance = qSqrt(distance);
+    return  distance;
+}
+
 /**
  * @brief RecognizerAlgorithm::featureExtraction
  * 特征提取
  */
 void RecognizerAlgorithm::featureExtraction(int (&array)[9],QList<QPoint>& pointsList)
 {
-    int maxX = 0, maxY = 0, minX = 0, minY = 0;
+    int maxX = 0, maxY = 0, minX = 0, minY = 0;/* 用于记录最大最小x，y坐标值 */
     int x1 = 0, y1 = 0, x2 = 0, y2 = 0, dx = 0, dy = 0;
 
     QPoint pos;
-    /* 寻找最大最小x，y坐标值 */
+    /* 寻找 */
     maxX = pointsList.first().x();
     minX = pointsList.first().x();
     maxY = pointsList.first().y();
@@ -121,7 +184,7 @@ void RecognizerAlgorithm::featureExtraction(int (&array)[9],QList<QPoint>& point
         array[i] = 0;
     }
 
-    /* 计算点落在每个区域的百分比 */
+    /* 计算点落在每个区域的点数 */
     for(int i=0; i<pointsList.size(); i++)
     {
         pos = pointsList[i];
@@ -162,7 +225,7 @@ void RecognizerAlgorithm::featureExtraction(int (&array)[9],QList<QPoint>& point
             array[8]++;
         }
     }
-
+    /* 将落在每个区域的点数换算成百分比 */
     for(int i=0; i<9; i++)
     {
         array[i] *= 100;

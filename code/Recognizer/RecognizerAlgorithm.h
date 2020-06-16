@@ -12,8 +12,10 @@ public:
     bool set(const int number, const QList<QPoint>& pointsList);
     void get(int &number, const QList<QPoint>& pointsList);
 protected:
+    bool getAverageChara(int number, Characteristic &averageChara);
+    double getDistance(Characteristic x, Characteristic y);/* 获取两个特征值间的距离 */
     void featureExtraction(int (&array)[9], QList<QPoint>& pointsList);
-    QList<Characteristic > m_dataDase[10];
+    Characteristic m_averageChara[10]{};
 };
 
 #endif // RECOGNIZERALGORITHM_H

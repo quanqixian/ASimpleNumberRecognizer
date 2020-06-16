@@ -11,15 +11,15 @@ int main(int argc, char *argv[])
     for(int i=0;i<=9;i++)
     {
         array[0] = i;
-        for(int j=0;j<=20;j++)
+        for(int j=0;j<=3;j++)
         {
             array[0] = j;
-            p->additem(i,array);
+            p->addItem(i,array);
         }
     }
 
     p->clearTable(5);
-    p->getitems(3, 2, 5, list);
+    p->getItems(3, 2, 5, list);
     for(auto it:list)
     {
         for(int i=0;i<9;i++)
@@ -28,6 +28,9 @@ int main(int argc, char *argv[])
         }
         qDebug()<<endl;
     }
+    int count = 0;
+    p->getItemsCount(3,count);
+    qDebug()<<"count is :"<<count;
     delete p;
     return a.exec();
 }

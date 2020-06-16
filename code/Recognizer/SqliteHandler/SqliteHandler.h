@@ -14,8 +14,9 @@ class SqliteHandler : public QObject
     Q_OBJECT
 public:
     static SqliteHandler* getInstance(void);
-    bool additem(int tableIndex, int (&array)[9]);
-    bool getitems(int tableIndex, int startIndex, int number, QList<Characteristic > &retList);
+    bool addItem(int tableIndex, int (&array)[9]);
+    bool getItems(int tableIndex, int startIndex, int number, QList<Characteristic > &retList);
+    bool getItemsCount(int tableIndex, int& retCount);
     bool clearTable(int tableIndex);
     ~SqliteHandler();
 private:
