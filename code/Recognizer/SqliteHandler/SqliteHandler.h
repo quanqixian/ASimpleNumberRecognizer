@@ -21,7 +21,6 @@ public:
     ~SqliteHandler();
 private:
     static QSqlDatabase m_db;
-    static SqliteHandler* m_instance;
     bool init(void);
 private:
     SqliteHandler();

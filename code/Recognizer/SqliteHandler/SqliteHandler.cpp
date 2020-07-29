@@ -5,7 +5,6 @@
 #include <QMutexLocker>
  
 QSqlDatabase SqliteHandler::m_db;
-SqliteHandler *SqliteHandler::m_instance = nullptr;
 
 SqliteHandler::SqliteHandler()
 {
@@ -20,16 +19,8 @@ SqliteHandler::~SqliteHandler()
 
 SqliteHandler* SqliteHandler::getInstance(void)
 {
-    static QMutex mutex;
-    if (!m_instance)
-    {
-        QMutexLocker locker(&mutex);
-        if (!m_instance)
-        {
-            m_instance = new SqliteHandler;
-        }
-    }
-    return m_instance;
+    static SqliteHandler handler;
+    return &handler;
 }
 
 bool SqliteHandler::init(void)
