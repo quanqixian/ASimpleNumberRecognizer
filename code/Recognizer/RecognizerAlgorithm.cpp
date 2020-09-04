@@ -43,6 +43,7 @@ bool RecognizerAlgorithm::getAverageChara(int number, Characteristic &averageCha
             }
         }
         countSum += list.size();
+        startRow += list.size();/*更新表读取起始位置*/
 
         /* 读到最后一页，不足ROW_NUMBER个，读完退出 */
         if(ROW_NUMBER != list.size())
