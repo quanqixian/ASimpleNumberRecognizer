@@ -147,7 +147,7 @@
 
 二阶构造流程：
 
-![img](U:\quanqx\ASimpleNumberRecognizer\pic\c03.jpg) 
+![img](./pic/c03.jpg) 
 
   数字识别类（Recognizer）、界面类 (RecognizerUI )、均使用二阶构造模式，防止异常的产生,下面是Recognizer类的中的二阶构造部分。
 
@@ -203,8 +203,87 @@ Recognizer* Recognizer::NewInstance()
 
 ​	系统需要在一个算法族中动态选择一种算法，可以将这些算法封装到多个具体算法类中，这些算法类都有共同的基类，即可以通过一个统一的接口调用任意一个算法，客户端可以使用任意一个算法，当前使用“向量的空间距离值”算法，之后也可以扩展KNN等识别算法，而只需要很小改动即可。 
 
- 
+##  4.数字识别数据库存储设计
 
- 
+### 4.1数据库类
 
- 
+-   选用Sqlite数据库，并将数据库相关的操作封装成一个单例类，数据库类的UML图如下：
+
+
+![img](./pic/d01.jpg) 
+
+-   数据库类封装了数据项的添加，查询，数量获取，表清空操作。
+
+### 4.2 数据库类的使用
+
+(1).算法类构造的时候，会从数据库中获取所有的记录项，并计算平均特征值，存放到RecognizerAlgorithm::m_averageChara数组中
+
+```c++
+RecognizerAlgorithm::RecognizerAlgorithm()
+{
+    /* 从数据库中初始化平均特征值 */
+    for(int i=0;i<10;i++)
+    {
+        getAverageChara(i, m_averageChara[i]);
+    }
+}
+```
+
+ (2).为了防止数据库中的表项过多，一次全部加载到内存中会占用太多的内存，采用分段加载的方式，实现函数为`RecognizerAlgorithm::getAverageChara`
+
+```c++
+bool RecognizerAlgorithm::getAverageChara(int number, Characteristic &averageChara)
+{
+    QList<Characteristic > list;
+    int startRow = 0;
+    int countSum = 0;
+    long long characterSumBuf[9] = {0};
+    while(true)
+    {
+        list.clear();
+        SqliteHandler::getInstance()->getItems(number, startRow, ROW_NUMBER, list);
+        for(int j = 0; j<list.size(); j++)
+        {
+            for(int i=0;i<9;i++)
+            {
+                characterSumBuf[i] += list[j].array[i];
+            }
+        }
+        countSum += list.size();
+        startRow += list.size();/*更新表读取起始位置*/
+
+        /* 读到最后一页，不足ROW_NUMBER个，读完退出 */
+        if(ROW_NUMBER != list.size())
+        {
+            break;
+        }
+    }
+    if(0 != countSum)
+    {
+        for(int i=0;i<9;i++)
+        {
+            averageChara.array[i] = characterSumBuf[i]/countSum;
+        }
+    }
+    return true;
+}
+```
+
+ (3).`RecognizerAlgorithm::set`对数据库的操作
+
+调用`SqliteHandler::addItem`添加一个特征值，添加特征值之后不会重新获取数据库中的所有项并重新计算，而是在现用的特征值的基础上进行计算，大大减少了计算量。
+
+```c++
+bool RecognizerAlgorithm::set(const int number, const QList<QPoint>& pointsList)
+{
+    //...
+    for(int j=0; j<9; j++)
+    {
+        m_averageChara[number].array[j] = 
+            (m_averageChara[number].array[j] * lastCount + chara.array[j])/(lastCount + 1);
+    }
+    //...
+} 
+```
+
+(4).`RecognizerAlgorithm::get` 不用读取数据库，直接根据`RecognizerAlgorithm::m_averageChara`数组中的最新特征平均值计算 最小特征距离。
