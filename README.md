@@ -276,6 +276,10 @@ bool RecognizerAlgorithm::getAverageChara(int number, Characteristic &averageCha
 
 调用`SqliteHandler::addItem`添加一个特征值，添加特征值之后不会重新获取数据库中的所有项并重新计算，而是在现用的特征值的基础上进行计算，大大减少了计算量。
 
+​	以苹果为例， 已知countLast的苹果的平均重量是 averageLast，现在添加一个重量为newRingoWeight的苹果，新的countLast + 1个苹果的平均值avarageNow为：
+
+$avarageNow$ = $ (countLast  *  averageLast + newRingoWeight) \over (countLast + 1)$
+
 ```c++
 bool RecognizerAlgorithm::set(const int number, const QList<QPoint>& pointsList)
 {
